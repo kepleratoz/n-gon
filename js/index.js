@@ -618,14 +618,6 @@ ${fullscreenWarning}
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks" style="font-size:1.15em;">performance mode</label>
 <br>
-<input onclick="build.toggleSpeedrunTimer()" type="checkbox" id="speedrun-timer-pause" name="speedrun-timer-pause" ${localSettings.isSpeedrunTimer ? "checked" : ""}>
-<label for="speedrun-timer-pause" title="show RTA (real time) and IGT (in game time) timers in the bottom right.  Timers start on your first movement and stop when the final boss is defeated." style="font-size:1.15em;">speedrun timer</label>
-<br>
-<span style="margin-left: 22px;">
-<input onclick="build.toggleSpeedrunMode()" type="checkbox" id="speedrun-mode-pause" name="speedrun-mode-pause" ${localSettings.isSpeedrunMode ? "checked" : ""} ${localSettings.isSpeedrunTimer ? "" : "disabled"}>
-<label for="speedrun-mode-pause" title="requires speedrun timer.  the first gun of the run offers every gun to choose from, and JUNK tech never appears" style="font-size:1.15em;">speedrun mode</label>
-</span>
-<br>
 <input onclick="build.toggleMobHealth()" type="checkbox" id="mob-health-pause" name="mob-health-pause" ${localSettings.isMobHealthDisplay ? "checked" : ""}>
 <label for="mob-health-pause" title="hovering the mouse over a mob or boss shows its current health / max health" style="font-size:1.15em;">mob health display</label>
 </div>
