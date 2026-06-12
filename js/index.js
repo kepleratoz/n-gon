@@ -390,6 +390,18 @@ const build = {
         if (pauseBox) pauseBox.checked = localSettings.isSpeedrunTimer
         simulation.speedrun.setEnabled(localSettings.isSpeedrunTimer)
     },
+    toggleMobHealth(isFromValue) { //keep the title and pause menu checkboxes in sync
+        if (isFromValue === undefined) {
+            localSettings.isMobHealthDisplay = !localSettings.isMobHealthDisplay
+        } else {
+            localSettings.isMobHealthDisplay = isFromValue
+        }
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        const settingBox = document.getElementById("mob-health-setting")
+        if (settingBox) settingBox.checked = localSettings.isMobHealthDisplay
+        const pauseBox = document.getElementById("mob-health-pause")
+        if (pauseBox) pauseBox.checked = localSettings.isMobHealthDisplay
+    },
     // pauseGridPhysics() {
 
     //     const { Engine, Render, Runner, Bodies, Body, World, Mouse, MouseConstraint, Events, Composite } = Matter;
@@ -587,6 +599,9 @@ ${fullscreenWarning}
 <br>
 <input onclick="build.toggleSpeedrunTimer()" type="checkbox" id="speedrun-timer-pause" name="speedrun-timer-pause" ${localSettings.isSpeedrunTimer ? "checked" : ""}>
 <label for="speedrun-timer-pause" title="show RTA (real time) and IGT (in game time) timers in the bottom right.  Timers start on your first movement and stop when the final boss is defeated." style="font-size:1.15em;">speedrun timer</label>
+<br>
+<input onclick="build.toggleMobHealth()" type="checkbox" id="mob-health-pause" name="mob-health-pause" ${localSettings.isMobHealthDisplay ? "checked" : ""}>
+<label for="mob-health-pause" title="hovering the mouse over a mob or boss shows its current health / max health" style="font-size:1.15em;">mob health display</label>
 </div>
 
 <div class="pause-grid-module">
@@ -2143,6 +2158,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.isSpeedrunTimer === undefined) localSettings.isSpeedrunTimer = false
     document.getElementById("speedrun-timer-setting").checked = localSettings.isSpeedrunTimer
 
+    if (localSettings.isMobHealthDisplay === undefined) localSettings.isMobHealthDisplay = false
+    document.getElementById("mob-health-setting").checked = localSettings.isMobHealthDisplay
+
     if (localSettings.difficultyCompleted === undefined) {
         localSettings.difficultyCompleted = [null, false, false, false, false, false, false, false] //null because there isn't a difficulty zero
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -2181,6 +2199,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideHUD: false,
         isSpeedrunTimer: false,
+        isMobHealthDisplay: false,
         pauseMenuDetailsOpen: [true, false, false, true],
         techHistory: [],
     };
@@ -2224,6 +2243,10 @@ document.getElementById("community-maps").addEventListener("input", () => {
 
 document.getElementById("speedrun-timer-setting").addEventListener("input", () => {
     build.toggleSpeedrunTimer(document.getElementById("speedrun-timer-setting").checked)
+});
+
+document.getElementById("mob-health-setting").addEventListener("input", () => {
+    build.toggleMobHealth(document.getElementById("mob-health-setting").checked)
 });
 
 document.getElementById("updates").addEventListener("toggle", function () {

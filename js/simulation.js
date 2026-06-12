@@ -18,6 +18,7 @@ const simulation = {
         level.custom();
         powerUps.do();
         mobs.draw();
+        mobs.drawHoverHealth();
         // simulation.draw.cons();
         simulation.draw.body();
         if (!m.isTimeDilated) mobs.loop();

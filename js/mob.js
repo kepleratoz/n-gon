@@ -28,6 +28,27 @@ const mobs = {
             ctx.stroke();
         }
     },
+    drawHoverHealth() { //when the setting is on, hovering a mob/boss shows its health/maxHealth as whole numbers
+        if (!localSettings.isMobHealthDisplay || simulation.onTitlePage || !mob.length) return
+        const mouse = simulation.mouseInGame
+        const camScale = simulation.zoom / simulation.edgeZoomOutSmooth //keep the text a constant size on screen regardless of zoom
+        const fontPx = 22 / camScale
+        ctx.font = `${fontPx}px "Helvetica", "Arial", sans-serif`
+        ctx.textAlign = "center"
+        ctx.textBaseline = "bottom"
+        for (let i = 0, len = mob.length; i < len; i++) {
+            const me = mob[i]
+            if (!me.alive || !me.vertices) continue
+            if (Matter.Vertices.contains(me.vertices, mouse)) {
+                const max = me.maxHealth === undefined ? 1 : me.maxHealth //mob health is normalized so full health = 1 = 100%
+                const text = `${Math.round((me.health / max) * 100)}%`
+                const x = me.position.x
+                const y = me.position.y - me.radius - 6 / camScale
+                ctx.fillStyle = "#fff"
+                ctx.fillText(text, x, y)
+            }
+        }
+    },
     statusSlow(who, cycles = 60) {
         applySlow(who)
         //look for mobs near the target
