@@ -1942,3 +1942,32 @@ summary {
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
+#speedrun-timer {
+    display: none;
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    z-index: 10;
+    pointer-events: none;
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    /* white text + difference blend = each pixel is the exact inverse of the background behind it */
+    color: #fff;
+    mix-blend-mode: difference;
+}
+
+#speedrun-timer .speedrun-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.5em;
+}
+
+#speedrun-timer .speedrun-label {
+    font-size: 0.65em;
+    letter-spacing: 0.05em;
+}

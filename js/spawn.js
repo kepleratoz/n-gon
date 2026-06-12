@@ -1280,6 +1280,7 @@ const spawn = {
             }
             if (!this.hasRunDeathScript) {
                 this.hasRunDeathScript = true
+                simulation.speedrun.stop() //final boss defeated: freeze the speedrun timers
                 //record win on this difficulty level to show up in the difficulty settings as a
                 if (!simulation.isCheating) {
                     localSettings.difficultyCompleted[simulation.difficultyMode] = true

@@ -33,6 +33,7 @@ const simulation = {
         simulation.runEphemera();
         ctx.restore();
         simulation.drawCursor();
+        simulation.speedrun.do();
     },
     testingLoop() {
         simulation.gravity();
@@ -728,6 +729,86 @@ const simulation = {
         player.force.y += player.mass * simulation.g;
     },
     firstRun: true,
+    speedrun: {
+        // RTA = real time attack (wall clock), IGT = in game time (game cycles / 60)
+        isEnabled: false, //mirror of localSettings.isSpeedrunTimer, set when a run begins
+        state: "off", //"off" | "armed" (waiting for first movement) | "running" | "stopped"
+        startReal: 0, //Date.now() when the timer started, for RTA
+        startCycle: 0, //simulation.cycle when the timer started, for IGT
+        finalReal: 0, //frozen RTA ms once stopped
+        finalCycle: 0, //frozen IGT cycles once stopped
+        arm() { //prepare the timer for a new run (called in startGame for normal runs)
+            this.reset()
+            this.isEnabled = !!localSettings.isSpeedrunTimer
+            if (this.isEnabled) this.state = "armed"
+        },
+        setEnabled(isOn) { //toggle the feature live (from the settings or pause menu)
+            this.isEnabled = !!isOn
+            if (!this.isEnabled) {
+                //when disabled the timer is never shown or running, so it can't "stop" frozen on screen
+                this.state = "off"
+                const el = document.getElementById("speedrun-timer")
+                if (el) el.style.display = "none"
+            } else if (this.state === "off" && !simulation.onTitlePage && m.alive) {
+                //enabled mid run: begin timing on the next movement input
+                this.state = "armed"
+            }
+        },
+        reset() { //hide and clear, used on return to the main menu
+            this.state = "off"
+            this.startReal = 0
+            this.startCycle = 0
+            this.finalReal = 0
+            this.finalCycle = 0
+            const el = document.getElementById("speedrun-timer")
+            if (el) el.style.display = "none"
+        },
+        start() { //begin timing on the first movement input after a run begins
+            this.state = "running"
+            this.startReal = Date.now()
+            this.startCycle = simulation.cycle
+            const el = document.getElementById("speedrun-timer")
+            if (el) el.style.display = "block"
+            this.draw()
+            this.tick() //self driving loop so RTA keeps counting even while the game is paused
+        },
+        tick() { //independent of the game loop, so RTA advances smoothly during pauses instead of jumping
+            const sr = simulation.speedrun //rAF calls this without `this` bound, so reference the object directly
+            if (sr.state !== "running") return
+            sr.draw()
+            requestAnimationFrame(sr.tick)
+        },
+        stop() { //freeze both timers when the final boss is defeated
+            if (!this.isEnabled || this.state !== "running") return //never stop/show a timer that isn't enabled and running
+            this.finalReal = Date.now() - this.startReal
+            this.finalCycle = simulation.cycle - this.startCycle
+            this.state = "stopped"
+            this.draw()
+        },
+        format(ms) {
+            if (!(ms > 0)) ms = 0
+            const totalSeconds = Math.floor(ms / 1000)
+            const milli = Math.floor(ms % 1000)
+            const seconds = totalSeconds % 60
+            const minutes = Math.floor(totalSeconds / 60) % 60
+            const hours = Math.floor(totalSeconds / 3600)
+            const pad = (n, len = 2) => String(n).padStart(len, "0")
+            const tail = `${pad(seconds)}.${pad(milli, 3)}`
+            return hours > 0 ? `${hours}:${pad(minutes)}:${tail}` : `${minutes}:${tail}`
+        },
+        do() { //called every frame from the game loop, only to detect the first movement input
+            if (this.state !== "armed") return
+            if (input.up || input.down || input.left || input.right) this.start() //start() launches the self driving tick loop
+        },
+        draw() {
+            const realMs = this.state === "stopped" ? this.finalReal : Date.now() - this.startReal
+            const cycles = this.state === "stopped" ? this.finalCycle : simulation.cycle - this.startCycle
+            const rta = document.getElementById("rta-time")
+            const igt = document.getElementById("igt-time")
+            if (rta) rta.textContent = this.format(realMs)
+            if (igt) igt.textContent = this.format(cycles * 1000 / 60)
+        },
+    },
     splashReturn() {
         if (document.fullscreenElement) {
             // mouseMove.isLockPointer = true
@@ -745,6 +826,7 @@ const simulation = {
 
         canvas.style.filter = "brightness(1)"
         simulation.clearTimeouts();
+        simulation.speedrun.reset() //hide and reset the speedrun timer on the main menu
         simulation.onTitlePage = true;
         document.getElementById("splash").onclick = function () {
             simulation.startGame();
@@ -940,6 +1022,12 @@ const simulation = {
             if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
         }
         simulation.isCheating = false
+        //speedrun timer: arm for normal runs only, waits for the first movement input to start
+        if (!isBuildRun && !isTrainingRun) {
+            simulation.speedrun.arm()
+        } else {
+            simulation.speedrun.reset()
+        }
         simulation.firstRun = false;
         build.hasExperimentalMode = false
         build.isExperimentSelection = false;

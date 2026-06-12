@@ -23,6 +23,10 @@
     <div id='right-HUD-constraint'></div>
     <div id='right-HUD'></div>
     <div id="text-log"></div>
+    <div id="speedrun-timer">
+        <div class="speedrun-row"><span class="speedrun-label">RTA</span><span id="rta-time">0:00.000</span></div>
+        <div class="speedrun-row"><span class="speedrun-label">IGT</span><span id="igt-time">0:00.000</span></div>
+    </div>
     <div id="fade-out"></div>
     <div id="health-bg"></div>
     <div id="health"></div>
@@ -71,6 +75,9 @@
                     <br>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
                     <label for="community-maps" title="add about 20 player made levels to the random n-gon level pool">community maps</label>
+                    <br>
+                    <input type="checkbox" id="speedrun-timer-setting" name="speedrun-timer-setting" style="width:17px; height:17px;">
+                    <label for="speedrun-timer-setting" title="show RTA (real time) and IGT (in game time) timers in the bottom right.  Timers start on your first movement and stop when the final boss is defeated.">speedrun timer</label>
                     <br>
                     <label for="banned" title="type banned levels with a space between them.  Example:  run temple biohazard">banned levels:</label>
                     <input id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />

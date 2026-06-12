@@ -377,6 +377,19 @@ const build = {
             })
         }
     },
+    toggleSpeedrunTimer(isFromValue) { //keep the title and pause menu checkboxes in sync and apply the change live
+        if (isFromValue === undefined) {
+            localSettings.isSpeedrunTimer = !localSettings.isSpeedrunTimer
+        } else {
+            localSettings.isSpeedrunTimer = isFromValue
+        }
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        const settingBox = document.getElementById("speedrun-timer-setting")
+        if (settingBox) settingBox.checked = localSettings.isSpeedrunTimer
+        const pauseBox = document.getElementById("speedrun-timer-pause")
+        if (pauseBox) pauseBox.checked = localSettings.isSpeedrunTimer
+        simulation.speedrun.setEnabled(localSettings.isSpeedrunTimer)
+    },
     // pauseGridPhysics() {
 
     //     const { Engine, Render, Runner, Bodies, Body, World, Mouse, MouseConstraint, Events, Composite } = Matter;
@@ -571,6 +584,9 @@ ${fullscreenWarning}
 <button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks" style="font-size:1.15em;">performance mode</label>
+<br>
+<input onclick="build.toggleSpeedrunTimer()" type="checkbox" id="speedrun-timer-pause" name="speedrun-timer-pause" ${localSettings.isSpeedrunTimer ? "checked" : ""}>
+<label for="speedrun-timer-pause" title="show RTA (real time) and IGT (in game time) timers in the bottom right.  Timers start on your first movement and stop when the final boss is defeated." style="font-size:1.15em;">speedrun timer</label>
 </div>
 
 <div class="pause-grid-module">
@@ -2124,6 +2140,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = true
     document.getElementById("hide-hud").checked = localSettings.isHideHUD
 
+    if (localSettings.isSpeedrunTimer === undefined) localSettings.isSpeedrunTimer = false
+    document.getElementById("speedrun-timer-setting").checked = localSettings.isSpeedrunTimer
+
     if (localSettings.difficultyCompleted === undefined) {
         localSettings.difficultyCompleted = [null, false, false, false, false, false, false, false] //null because there isn't a difficulty zero
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -2161,6 +2180,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         isHuman: false,
         key: undefined,
         isHideHUD: false,
+        isSpeedrunTimer: false,
         pauseMenuDetailsOpen: [true, false, false, true],
         techHistory: [],
     };
@@ -2200,6 +2220,10 @@ document.getElementById("community-maps").addEventListener("input", () => {
     simulation.isCommunityMaps = document.getElementById("community-maps").checked
     localSettings.isCommunityMaps = simulation.isCommunityMaps
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+document.getElementById("speedrun-timer-setting").addEventListener("input", () => {
+    build.toggleSpeedrunTimer(document.getElementById("speedrun-timer-setting").checked)
 });
 
 document.getElementById("updates").addEventListener("toggle", function () {
