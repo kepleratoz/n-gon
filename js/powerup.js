@@ -1282,6 +1282,8 @@ const powerUps = {
                         tech.cancelTechCount++
                     }
                     if (tech.isDeterminism) totalChoices = 1
+                    //speedrun mode: the first gun of the run (empty inventory, first level) offers every gun
+                    if (localSettings.isSpeedrunMode && b.inventory.length === 0) totalChoices = options.length
                     totalChoices = Math.min(totalChoices, options.length)
                     function removeOption(index) {
                         for (let i = 0; i < options.length; i++) {
@@ -1484,7 +1486,7 @@ const powerUps = {
                     }
                     for (let i = 0; i < totalChoices; i++) {
                         if (options.length < 1) break
-                        if (Math.random() < tech.junkChance + level.junkAdded) { // choose is set to a random JUNK tech
+                        if (/* !localSettings.isSpeedrunMode && */ Math.random() < tech.junkChance + level.junkAdded) { // choose is set to a random JUNK tech  //speedrun mode's "no junk" effect is temporarily disabled: re-add the commented condition to restore it
                             const list = []
                             for (let i = 0; i < tech.tech.length; i++) {
                                 if (tech.tech[i].isJunk) list.push(i)

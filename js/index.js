@@ -389,6 +389,27 @@ const build = {
         const pauseBox = document.getElementById("speedrun-timer-pause")
         if (pauseBox) pauseBox.checked = localSettings.isSpeedrunTimer
         simulation.speedrun.setEnabled(localSettings.isSpeedrunTimer)
+        if (!localSettings.isSpeedrunTimer) localSettings.isSpeedrunMode = false //speedrun mode can't stay on without the timer
+        build.syncSpeedrunMode()
+    },
+    toggleSpeedrunMode(isFromValue) { //only allowed while the speedrun timer is enabled
+        let next = (isFromValue === undefined) ? !localSettings.isSpeedrunMode : isFromValue
+        if (!localSettings.isSpeedrunTimer) next = false
+        localSettings.isSpeedrunMode = next
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        build.syncSpeedrunMode()
+    },
+    syncSpeedrunMode() { //keep both speedrun mode checkboxes in sync and disable them when the timer is off
+        const allowed = !!localSettings.isSpeedrunTimer
+        for (const id of ["speedrun-mode-setting", "speedrun-mode-pause"]) {
+            const box = document.getElementById(id)
+            if (!box) continue
+            box.checked = localSettings.isSpeedrunMode
+            box.disabled = !allowed
+            box.style.opacity = allowed ? "1" : "0.4"
+            const label = document.querySelector(`label[for="${id}"]`)
+            if (label) label.style.opacity = allowed ? "1" : "0.4" //grey out just this label when disabled
+        }
     },
     toggleMobHealth(isFromValue) { //keep the title and pause menu checkboxes in sync
         if (isFromValue === undefined) {
@@ -599,6 +620,11 @@ ${fullscreenWarning}
 <br>
 <input onclick="build.toggleSpeedrunTimer()" type="checkbox" id="speedrun-timer-pause" name="speedrun-timer-pause" ${localSettings.isSpeedrunTimer ? "checked" : ""}>
 <label for="speedrun-timer-pause" title="show RTA (real time) and IGT (in game time) timers in the bottom right.  Timers start on your first movement and stop when the final boss is defeated." style="font-size:1.15em;">speedrun timer</label>
+<br>
+<span style="margin-left: 22px;">
+<input onclick="build.toggleSpeedrunMode()" type="checkbox" id="speedrun-mode-pause" name="speedrun-mode-pause" ${localSettings.isSpeedrunMode ? "checked" : ""} ${localSettings.isSpeedrunTimer ? "" : "disabled"}>
+<label for="speedrun-mode-pause" title="requires speedrun timer.  the first gun of the run offers every gun to choose from, and JUNK tech never appears" style="font-size:1.15em;">speedrun mode</label>
+</span>
 <br>
 <input onclick="build.toggleMobHealth()" type="checkbox" id="mob-health-pause" name="mob-health-pause" ${localSettings.isMobHealthDisplay ? "checked" : ""}>
 <label for="mob-health-pause" title="hovering the mouse over a mob or boss shows its current health / max health" style="font-size:1.15em;">mob health display</label>
@@ -2158,6 +2184,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.isSpeedrunTimer === undefined) localSettings.isSpeedrunTimer = false
     document.getElementById("speedrun-timer-setting").checked = localSettings.isSpeedrunTimer
 
+    if (localSettings.isSpeedrunMode === undefined) localSettings.isSpeedrunMode = false
+    if (!localSettings.isSpeedrunTimer) localSettings.isSpeedrunMode = false //speedrun mode requires the speedrun timer
+
     if (localSettings.isMobHealthDisplay === undefined) localSettings.isMobHealthDisplay = false
     document.getElementById("mob-health-setting").checked = localSettings.isMobHealthDisplay
 
@@ -2199,6 +2228,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideHUD: false,
         isSpeedrunTimer: false,
+        isSpeedrunMode: false,
         isMobHealthDisplay: false,
         pauseMenuDetailsOpen: [true, false, false, true],
         techHistory: [],
@@ -2244,6 +2274,11 @@ document.getElementById("community-maps").addEventListener("input", () => {
 document.getElementById("speedrun-timer-setting").addEventListener("input", () => {
     build.toggleSpeedrunTimer(document.getElementById("speedrun-timer-setting").checked)
 });
+
+document.getElementById("speedrun-mode-setting").addEventListener("input", () => {
+    build.toggleSpeedrunMode(document.getElementById("speedrun-mode-setting").checked)
+});
+build.syncSpeedrunMode() //initialize the speedrun mode checkbox state (checked + enabled) on load
 
 document.getElementById("mob-health-setting").addEventListener("input", () => {
     build.toggleMobHealth(document.getElementById("mob-health-setting").checked)
